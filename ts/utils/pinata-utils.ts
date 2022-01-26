@@ -6,6 +6,7 @@ import fs from 'fs';
 // @ts-ignore
 import pinataSDK, { PinataOptions, PinataPinOptions } from '@pinata/sdk';
 import { sleep } from './utils';
+import { ASSETS_CID } from "../constants";
 
 const defaultOptions: Partial<PinataPinOptions> = {
   pinataOptions: {
@@ -41,7 +42,12 @@ export const uploadAndPinIpfsMetadata = async (metadataFields: NFTMetadata): Pro
   }
 };
 
-// Upload and pin local data to IPFS. Return metadata
+/*  Upload and pin local data to IPFS. Return metadata 
+    Updates this so that it is not pushing a new image 
+    each time to IPFS but instead reusing the same one
+    will need to first pin image using pinata and then
+    grab the cid of that image to push
+*/
 export const pinSingleMetadataFromDir = async (
   dir: string,
   path: string,
@@ -49,16 +55,18 @@ export const pinSingleMetadataFromDir = async (
   metadataBase: Partial<NFTMetadata>,
 ) => {
   try {
-    // const imageFile = await fsPromises.readFile(`${process.cwd()}${dir}/${path}`);
-    // if (!imageFile) {
-    //   throw new Error('No image file');
-    // }
+    /* for uploading singluar images do uncomment this
+     const imageFile = await fsPromises.readFile(`${process.cwd()}${dir}/${path}`);
+     if (!imageFile) {
+       throw new Error('No image file');
+     }
 
-    // const stream: StreamPinata = Readable.from(imageFile);
-    // stream.path = path;
+     const stream: StreamPinata = Readable.from(imageFile);
+     stream.path = path;
 
-    // const imageCid = await pinFileStreamToIpfs(stream, name);
-    const imageCid = "bafybeicuuasrqnqndfw3k6rqacfpfil5sc5fhyjh63riqnd2imm5eucrk4"
+    const imageCid = await pinFileStreamToIpfs(stream, name);
+    */
+    const imageCid = ASSETS_CID
     console.log(`NFT ${path} IMAGE CID: `, imageCid);
     const metadata: NFTMetadata = { ...metadataBase, name, image: `ipfs://ipfs/${imageCid}` };
     const metadataCid = await uploadAndPinIpfsMetadata(metadata);
