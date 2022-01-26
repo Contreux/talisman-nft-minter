@@ -7,7 +7,6 @@ import { ApiPromise, Keyring, WsProvider } from "@polkadot/api";
 import { SubmittableExtrinsic } from "@polkadot/api/types";
 import { ISubmittableResult } from "@polkadot/types/types";
 import { CodecHash } from "@polkadot/types/interfaces";
-import { NFTConsolidated } from "rmrk-tools/dist/tools/consolidator/consolidator";
 
 export const getKeys = (): KeyringPair[] => {
   const k = [];
@@ -31,15 +30,6 @@ export const getApi = async (wsEndpoint: string): Promise<ApiPromise> => {
   const wsProvider = new WsProvider(wsEndpoint);
   const api = ApiPromise.create({ provider: wsProvider });
   return api;
-};
-
-export const chunkArray = (array: any[], size: number) => {
-  let result = [];
-  for (let i = 0; i < array.length; i += size) {
-    let chunk = array.slice(i, i + size);
-    result.push(chunk);
-  }
-  return result;
 };
 
 
@@ -88,30 +78,4 @@ export const sendAndFinalize = async (
       }
     );
   });
-};
-
-
-
-// Retreive NFT Data
-export const fetchNFTData = async (addresses: string[]) => {
-  try {
-    let data: NFTConsolidated[] = []
-    for await (const address of addresses){
-      console.log("address",address)
-      const payload = await fetch(`https://singular.rmrk.app/api/rmrk1/account/${address}`);
-      const nftData: JSON[] = await payload.json();
-      const nftDataConsolidated: NFTConsolidated[] = (nftData as unknown) as NFTConsolidated[]
-      console.log("consolidated",nftDataConsolidated)
-
-
-     for (let i = 0; i < nftDataConsolidated.length; i++) {
-        nftDataConsolidated[i].collection = nftData[i]["collectionId"]
-     }
-     data = data.concat(nftDataConsolidated);
-    }
-    console.log(data)
-    return data
-  } catch (error: any) {
-    console.log(error);
-  }
 };
